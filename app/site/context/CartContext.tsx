@@ -9,7 +9,7 @@ export interface CartItem {
   size: string;
   price: number;
   quantity: number;
-  type: "tee" | "shorts";
+  type: "tee" | "shorts" | "hat" | string;
   colorHex: string;
 }
 
@@ -25,6 +25,7 @@ interface CartContextType {
   addToCart: (item: Omit<CartItem, "id">) => void;
   updateQuantity: (id: string, delta: number) => void;
   removeItem: (id: string) => void;
+  clearCart: () => void;
   totalCount: number;
   totalAmount: number;
 }
@@ -33,19 +34,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const STORAGE_KEY = "homeboy_cart_v1";
 
-const DEFAULT_INITIAL_ITEM: CartItem = {
-  id: "shorts-blue-S",
-  productId: "shorts-blue",
-  name: "KLEIN BLUE HOMEBOY LOGO SHORTS",
-  size: "S",
-  price: 109.0,
-  quantity: 1,
-  type: "shorts",
-  colorHex: "#1d4ed8",
-};
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([DEFAULT_INITIAL_ITEM]);
+  const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -54,9 +44,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setItems(parsed);
         }
       }
@@ -123,6 +113,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const clearCart = () => {
+    setItems([]);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+    } catch (e) {
+      console.error("Failed to clear cart storage", e);
+    }
+  };
+
   const totalCount = items.reduce((acc, i) => acc + i.quantity, 0);
   const totalAmount = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
 
@@ -140,6 +139,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         addToCart,
         updateQuantity,
         removeItem,
+        clearCart,
         totalCount,
         totalAmount,
       }}

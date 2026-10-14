@@ -12,7 +12,7 @@ function StreetwearProductVisual({
   type,
   color,
 }: {
-  type: "tee" | "shorts";
+  type: "tee" | "shorts" | "hat" | string;
   color: string;
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -63,34 +63,40 @@ function StreetwearProductVisual({
         {/* FRONT SIDE (01 / FRONT)                                                   */}
         {/* ========================================================================= */}
         <div className="absolute inset-0 flex items-center justify-center backface-hidden">
-          {type === "tee" ? (
+          {type === "hat" ? (
             <svg
               viewBox="0 0 160 140"
               className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              {/* Main T-Shirt Body */}
               <path
-                d="M50 16 C60 28 100 28 110 16 L145 38 L126 64 L112 55 L112 130 L48 130 L48 55 L34 64 L15 38 Z"
+                d="M35 85 C35 38 125 38 125 85 Z"
                 fill={color}
                 stroke={color === "#ffffff" ? "#d4d4d8" : color}
                 strokeWidth="2"
-                strokeLinejoin="round"
               />
-              {/* Collar Fold */}
               <path
-                d="M50 16 C60 28 100 28 110 16 C100 22 60 22 50 16 Z"
-                fill={color === "#ffffff" ? "#f4f4f5" : "rgba(0,0,0,0.2)"}
-                stroke={color === "#ffffff" ? "#a1a1aa" : "rgba(255,255,255,0.25)"}
-                strokeWidth="1.5"
+                d="M20 85 C20 85 80 115 140 85 C132 80 120 78 110 78 L50 78 C40 78 28 80 20 85 Z"
+                fill={color}
+                stroke={color === "#ffffff" ? "#d4d4d8" : color}
+                strokeWidth="2"
               />
-              {/* Front HOMEBOY Typography */}
+              <rect
+                x="52"
+                y="52"
+                width="56"
+                height="20"
+                rx="2"
+                fill="rgba(0,0,0,0.15)"
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="1"
+              />
               <text
                 x="80"
-                y="68"
+                y="65"
                 fill={color === "#ffffff" ? "#000000" : "#ffffff"}
-                fontSize="10"
+                fontSize="7"
                 fontWeight="900"
                 fontStyle="italic"
                 textAnchor="middle"
@@ -98,8 +104,19 @@ function StreetwearProductVisual({
               >
                 HOMEBOY
               </text>
+              <text
+                x="80"
+                y="71"
+                fill={color === "#ffffff" ? "#52525b" : "rgba(255,255,255,0.7)"}
+                fontSize="4"
+                fontWeight="800"
+                textAnchor="middle"
+                letterSpacing="0.1em"
+              >
+                CAP CO.
+              </text>
             </svg>
-          ) : (
+          ) : type === "shorts" ? (
             <svg
               viewBox="0 0 160 140"
               className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -160,6 +177,42 @@ function StreetwearProductVisual({
                 </text>
               </g>
             </svg>
+          ) : (
+            <svg
+              viewBox="0 0 160 140"
+              className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Main T-Shirt Body */}
+              <path
+                d="M50 16 C60 28 100 28 110 16 L145 38 L126 64 L112 55 L112 130 L48 130 L48 55 L34 64 L15 38 Z"
+                fill={color}
+                stroke={color === "#ffffff" ? "#d4d4d8" : color}
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+              {/* Collar Fold */}
+              <path
+                d="M50 16 C60 28 100 28 110 16 C100 22 60 22 50 16 Z"
+                fill={color === "#ffffff" ? "#f4f4f5" : "rgba(0,0,0,0.2)"}
+                stroke={color === "#ffffff" ? "#a1a1aa" : "rgba(255,255,255,0.25)"}
+                strokeWidth="1.5"
+              />
+              {/* Front HOMEBOY Typography */}
+              <text
+                x="80"
+                y="68"
+                fill={color === "#ffffff" ? "#000000" : "#ffffff"}
+                fontSize="10"
+                fontWeight="900"
+                fontStyle="italic"
+                textAnchor="middle"
+                letterSpacing="0.06em"
+              >
+                HOMEBOY
+              </text>
+            </svg>
           )}
         </div>
 
@@ -170,7 +223,127 @@ function StreetwearProductVisual({
           className="absolute inset-0 flex items-center justify-center backface-hidden"
           style={{ transform: "rotateY(180deg)" }}
         >
-          {type === "tee" ? (
+          {type === "hat" ? (
+            <svg
+              viewBox="0 0 160 140"
+              className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M35 85 C35 38 125 38 125 85 Z"
+                fill={color}
+                stroke={color === "#ffffff" ? "#d4d4d8" : color}
+                strokeWidth="2"
+              />
+              <path
+                d="M60 85 C60 65 100 65 100 85 Z"
+                fill="#fafafa"
+                stroke={color === "#ffffff" ? "#d4d4d8" : color}
+                strokeWidth="2"
+              />
+              <rect
+                x="52"
+                y="78"
+                width="56"
+                height="7"
+                rx="1.5"
+                fill="#18181b"
+                stroke="rgba(255,255,255,0.4)"
+                strokeWidth="0.8"
+              />
+              <rect
+                x="74"
+                y="76"
+                width="12"
+                height="11"
+                rx="1"
+                fill="#d4af37"
+                stroke="#000000"
+                strokeWidth="1"
+              />
+              <text
+                x="80"
+                y="52"
+                fill={color === "#ffffff" ? "#000000" : "#ffffff"}
+                fontSize="6"
+                fontWeight="900"
+                fontStyle="italic"
+                textAnchor="middle"
+              >
+                HB ARCHIVE
+              </text>
+            </svg>
+          ) : type === "shorts" ? (
+            <svg
+              viewBox="0 0 160 140"
+              className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Back Waistband with Brand Patch */}
+              <rect
+                x="36"
+                y="18"
+                width="88"
+                height="12"
+                rx="2"
+                fill={color}
+                stroke={color}
+                strokeWidth="2"
+              />
+              <rect
+                x="88"
+                y="20"
+                width="24"
+                height="8"
+                rx="1"
+                fill="#000000"
+                stroke="rgba(255,255,255,0.4)"
+                strokeWidth="0.8"
+              />
+              <text
+                x="100"
+                y="26"
+                fill="#ffffff"
+                fontSize="4"
+                fontWeight="900"
+                textAnchor="middle"
+              >
+                HB CO.
+              </text>
+              {/* Shorts Leg Outlines */}
+              <path
+                d="M36 28 L30 115 C30 118 64 122 74 116 L80 65 L86 116 C96 122 130 118 130 115 L124 28 Z"
+                fill={color}
+                stroke={color}
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+              {/* Back Pocket */}
+              <rect
+                x="86"
+                y="45"
+                width="30"
+                height="32"
+                rx="2"
+                fill="rgba(0,0,0,0.12)"
+                stroke="rgba(255,255,255,0.25)"
+                strokeWidth="1.2"
+              />
+              <text
+                x="101"
+                y="63"
+                fill="#ffffff"
+                fontSize="5"
+                fontWeight="900"
+                textAnchor="middle"
+                opacity="0.8"
+              >
+                BACK POCKET
+              </text>
+            </svg>
+          ) : (
             <svg
               viewBox="0 0 160 140"
               className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -249,75 +422,6 @@ function StreetwearProductVisual({
                 <rect x="30" y="0" width="2" height="12" fill={color === "#ffffff" ? "#000" : "#fff"} />
               </g>
             </svg>
-          ) : (
-            <svg
-              viewBox="0 0 160 140"
-              className="w-4/5 h-4/5 drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Back Waistband with Brand Patch */}
-              <rect
-                x="36"
-                y="18"
-                width="88"
-                height="12"
-                rx="2"
-                fill={color}
-                stroke={color}
-                strokeWidth="2"
-              />
-              <rect
-                x="88"
-                y="20"
-                width="24"
-                height="8"
-                rx="1"
-                fill="#000000"
-                stroke="rgba(255,255,255,0.4)"
-                strokeWidth="0.8"
-              />
-              <text
-                x="100"
-                y="26"
-                fill="#ffffff"
-                fontSize="4"
-                fontWeight="900"
-                textAnchor="middle"
-              >
-                HB CO.
-              </text>
-              {/* Shorts Body */}
-              <path
-                d="M36 28 L30 115 C30 118 64 122 74 116 L80 65 L86 116 C96 122 130 118 130 115 L124 28 Z"
-                fill={color}
-                stroke={color}
-                strokeWidth="2"
-                strokeLinejoin="round"
-              />
-              {/* Rear Pocket */}
-              <rect
-                x="86"
-                y="45"
-                width="30"
-                height="32"
-                rx="2"
-                fill="rgba(0,0,0,0.12)"
-                stroke="rgba(255,255,255,0.25)"
-                strokeWidth="1.2"
-              />
-              <text
-                x="101"
-                y="63"
-                fill="#ffffff"
-                fontSize="5"
-                fontWeight="900"
-                textAnchor="middle"
-                opacity="0.8"
-              >
-                BACK POCKET
-              </text>
-            </svg>
           )}
         </div>
       </div>
@@ -343,16 +447,59 @@ function StorefrontContent() {
 
   const [products, setProducts] = useState(Object.values(PRODUCTS_DATABASE));
 
-  useEffect(() => {
-    fetch("/api/products", { cache: "no-store" })
+  const refreshProducts = React.useCallback(() => {
+    fetch(`/api/products?_t=${Date.now()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setProducts(data);
         }
       })
-      .catch((err) => console.log("Using cached products:", err));
+      .catch((err) => console.log("Live products refresh:", err));
   }, []);
+
+  useEffect(() => {
+    refreshProducts();
+
+    // 1. Instant cross-tab real-time sync via BroadcastChannel
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("homeboy-stock-sync");
+      bc.onmessage = () => {
+        refreshProducts();
+      };
+    } catch (e) {
+      // ignore
+    }
+
+    // 2. Cross-tab sync via localStorage storage event
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "hb_stock_updated") {
+        refreshProducts();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // 3. Tab visibility/focus auto refresh
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshProducts();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", refreshProducts);
+
+    // 4. Polling interval every 2 seconds
+    const interval = setInterval(refreshProducts, 2000);
+
+    return () => {
+      if (bc) bc.close();
+      window.removeEventListener("storage", handleStorage);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", refreshProducts);
+      clearInterval(interval);
+    };
+  }, [refreshProducts]);
 
   const availableCategories = React.useMemo(() => {
     const dynamicCats = Array.from(
@@ -447,29 +594,54 @@ function StorefrontContent() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-                  {catProducts.map((product) => (
-                    <Link
-                      key={product.id}
-                      href={`/product/${product.id}`}
-                      className="group cursor-pointer space-y-3 block"
-                    >
-                      <div className="aspect-square w-full bg-[#fafafa] border border-[#ebebeb] group-hover:border-black transition-all duration-300 overflow-hidden relative">
-                        <StreetwearProductVisual
-                          type={product.type === "shorts" || product.category === "SHORTS" || product.category === "PANTS" ? "shorts" : "tee"}
-                          color={product.colorHex}
-                        />
-                      </div>
+                  {catProducts.map((product) => {
+                    const isSoldOut = product.stock !== undefined && product.stock <= 0;
+                    return (
+                      <Link
+                        key={product.id}
+                        href={`/product/${product.id}`}
+                        className="group cursor-pointer space-y-3 block relative"
+                      >
+                        <div className="aspect-square w-full bg-[#fafafa] border border-[#ebebeb] group-hover:border-black transition-all duration-300 overflow-hidden relative">
+                          <StreetwearProductVisual
+                            type={
+                              product.type === "hat" || product.category === "HATS" || product.category === "HAT"
+                                ? "hat"
+                                : product.type === "shorts" || product.category === "SHORTS" || product.category === "PANTS"
+                                ? "shorts"
+                                : "tee"
+                            }
+                            color={product.colorHex}
+                          />
 
-                      <div className="text-left space-y-0.5">
-                        <h3 className="font-body font-black text-[11px] tracking-wider text-black uppercase group-hover:underline truncate">
-                          {product.name}
-                        </h3>
-                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">
-                          {product.price}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+                          {/* SOLD OUT Badge Overlay */}
+                          {isSoldOut && (
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-30 pointer-events-none">
+                              <span className="bg-black text-white text-[10px] font-black tracking-[0.25em] uppercase px-4 py-1.5 shadow-md border border-black transform -rotate-3">
+                                SOLD OUT
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="text-left space-y-0.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="font-body font-black text-[11px] tracking-wider text-black uppercase group-hover:underline truncate">
+                              {product.name}
+                            </h3>
+                            {isSoldOut && (
+                              <span className="text-[8px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 shrink-0">
+                                SOLD OUT
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">
+                            {product.price}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </section>

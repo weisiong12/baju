@@ -246,8 +246,39 @@ export default function ProductsPage() {
     }
   }, [router]);
 
+interface AdminProduct {
+  id: string;
+  sku: string;
+  name: string;
+  price: string;
+  shirtColor: string;
+  logoColor: string;
+  stock: string;
+  rawStock?: number;
+  stockAllocation?: Record<string, number>;
+  sizes: string[];
+  category: string;
+}
+
+function notifyStockSync() {
+  if (typeof window !== "undefined") {
+    try {
+      const bc = new BroadcastChannel("homeboy-stock-sync");
+      bc.postMessage({ type: "STOCK_UPDATED", timestamp: Date.now() });
+      bc.close();
+    } catch (e) {
+      // ignore
+    }
+    try {
+      localStorage.setItem("hb_stock_updated", Date.now().toString());
+    } catch (e) {
+      // ignore
+    }
+  }
+}
+
   // Products state list
-  const [products, setProducts] = useState([
+  const [products, setProducts] = useState<AdminProduct[]>([
     {
       id: "tee-white",
       sku: "TEE • LOGO-001",
@@ -318,7 +349,9 @@ export default function ProductsPage() {
             price: p.price.startsWith("RM") ? p.price : `RM ${p.priceNumber || 99}`,
             shirtColor: p.colorHex || "#ffffff",
             logoColor: p.colorHex === "#ffffff" ? "#000000" : "#ffffff",
-            stock: "250 PIECES",
+            stock: `${p.stock ?? 250} PIECES`,
+            rawStock: p.stock ?? 250,
+            stockAllocation: p.stockAllocation || { S: 50, M: 50, L: 50, XL: 50, XXL: 50 },
             sizes: p.sizes || ["S", "M", "L", "XL", "XXL"],
             category: p.category || "TEES",
           }));
@@ -398,13 +431,15 @@ export default function ProductsPage() {
       );
     }
 
-    setEditStockAllocation({
-      S: 49,
-      M: 50,
-      L: 50,
-      XL: 50,
-      XXL: 50,
-    });
+    setEditStockAllocation(
+      item.stockAllocation || {
+        S: item.rawStock !== undefined ? Math.floor(item.rawStock / 5) : 50,
+        M: item.rawStock !== undefined ? Math.floor(item.rawStock / 5) : 50,
+        L: item.rawStock !== undefined ? Math.floor(item.rawStock / 5) : 50,
+        XL: item.rawStock !== undefined ? Math.floor(item.rawStock / 5) : 50,
+        XXL: item.rawStock !== undefined ? Math.floor(item.rawStock / 5) : 50,
+      }
+    );
 
     setShowEditModal(true);
   };
@@ -437,6 +472,8 @@ export default function ProductsPage() {
             price: `RM ${editPrice}`,
             sku: `${finalCategory} • ${editModelId}`,
             stock: `${totalStock} PIECES`,
+            rawStock: totalStock,
+            stockAllocation: editStockAllocation,
             shirtColor: editShirtColor,
             logoColor: editShirtColor === "#ffffff" ? "#000000" : "#ffffff",
             category: finalCategory,
@@ -447,6 +484,7 @@ export default function ProductsPage() {
     );
 
     setShowEditModal(false);
+    notifyStockSync();
 
     // Save to TiDB Cloud
     try {
@@ -462,8 +500,11 @@ export default function ProductsPage() {
           type: finalType,
           colorHex: editShirtColor,
           description: editNarrative.split("\n").filter((l) => l.trim()),
+          stock: totalStock,
+          stockAllocation: editStockAllocation,
         }),
       });
+      notifyStockSync();
     } catch (err) {
       console.log("Updated locally:", err);
     }
@@ -500,12 +541,15 @@ export default function ProductsPage() {
       shirtColor: newShirtColor,
       logoColor: newShirtColor === "#ffffff" ? "#000000" : "#ffffff",
       stock: `${totalStock} PIECES`,
+      rawStock: totalStock,
+      stockAllocation,
       sizes: ["S", "M", "L", "XL", "XXL"],
       category: finalCategory,
     };
 
     setProducts([newProduct, ...products]);
     setShowAddModal(false);
+    notifyStockSync();
 
     // Save to TiDB Cloud
     try {
@@ -547,8 +591,11 @@ export default function ProductsPage() {
           colorHex: newShirtColor,
           sizes: ["S", "M", "L", "XL", "XXL"],
           description: narrativeLines,
+          stock: totalStock,
+          stockAllocation,
         }),
       });
+      notifyStockSync();
     } catch (err) {
       console.log("Saved locally:", err);
     }
@@ -576,8 +623,10 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     setProducts(products.filter((p) => p.id !== id));
+    notifyStockSync();
     try {
       await fetch(`/api/products/${id}`, { method: "DELETE" });
+      notifyStockSync();
     } catch (err) {
       console.log("Deleted locally:", err);
     }
@@ -790,8 +839,16 @@ export default function ProductsPage() {
                       <div className="text-[8px] font-bold tracking-widest text-neutral-400 uppercase mb-1.5">
                         INVENTORY UNITS
                       </div>
-                      <div className="font-display font-black italic text-xs tracking-wider text-[#16a34a] whitespace-nowrap">
-                        {item.stock}
+                      <div
+                        className={`font-display font-black italic text-xs tracking-wider whitespace-nowrap ${
+                          (item.rawStock ?? parseInt(item.stock) ?? 0) <= 0
+                            ? "text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5"
+                            : "text-[#16a34a]"
+                        }`}
+                      >
+                        {(item.rawStock ?? parseInt(item.stock) ?? 0) <= 0
+                          ? "0 PIECES (SOLD OUT)"
+                          : item.stock}
                       </div>
                     </div>
 

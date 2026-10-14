@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { pool, mapRowToProduct, initDatabase } from "@/app/lib/db";
 import { PRODUCTS_DATABASE } from "@/app/site/data/products";
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
 // GET /api/products/[id]
 export async function GET(
   request: Request,
@@ -16,21 +22,21 @@ export async function GET(
     );
 
     if (rows && rows.length > 0) {
-      return NextResponse.json(mapRowToProduct(rows[0]));
+      return NextResponse.json(mapRowToProduct(rows[0]), { headers: NO_CACHE_HEADERS });
     }
 
     // Fallback to static DB if not found
     const fallback = PRODUCTS_DATABASE[id];
     if (fallback) {
-      return NextResponse.json(fallback);
+      return NextResponse.json(fallback, { headers: NO_CACHE_HEADERS });
     }
 
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    return NextResponse.json({ error: "Product not found" }, { status: 404, headers: NO_CACHE_HEADERS });
   } catch (error: any) {
     console.error(`Failed to get product ${id}:`, error);
     const fallback = PRODUCTS_DATABASE[id];
-    if (fallback) return NextResponse.json(fallback);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (fallback) return NextResponse.json(fallback, { headers: NO_CACHE_HEADERS });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: NO_CACHE_HEADERS });
   }
 }
 
@@ -83,15 +89,32 @@ export async function PUT(
     const description = JSON.stringify(descArr);
     const sizes = body.sizes ? (typeof body.sizes === "string" ? body.sizes : JSON.stringify(body.sizes)) : (current?.sizes ? (typeof current.sizes === "string" ? current.sizes : JSON.stringify(current.sizes)) : JSON.stringify(["S", "M", "L", "XL", "XXL"]));
 
+    let stockAllocation = body.stockAllocation;
+    if (!stockAllocation && current?.stock_allocation) {
+      try {
+        stockAllocation = typeof current.stock_allocation === "string" ? JSON.parse(current.stock_allocation) : current.stock_allocation;
+      } catch {
+        stockAllocation = { S: 50, M: 50, L: 50, XL: 50, XXL: 50 };
+      }
+    }
+    if (!stockAllocation) {
+      stockAllocation = { S: 50, M: 50, L: 50, XL: 50, XXL: 50 };
+    }
+
+    const stock =
+      body.stock !== undefined && body.stock !== null
+        ? Number(body.stock)
+        : Object.values(stockAllocation).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
+
     if (current) {
       // Update existing record
       await pool.query(
         `
         UPDATE products
-        SET name = ?, category = ?, price = ?, price_number = ?, sku = ?, type = ?, color_name = ?, color_hex = ?, sizes = ?, description = ?
+        SET name = ?, category = ?, price = ?, price_number = ?, sku = ?, type = ?, color_name = ?, color_hex = ?, sizes = ?, description = ?, stock = ?, stock_allocation = ?
         WHERE id = ?
       `,
-        [name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, id]
+        [name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, stock, JSON.stringify(stockAllocation), id]
       );
     } else {
       // Insert if not yet in DB
@@ -99,10 +122,10 @@ export async function PUT(
         `
         INSERT INTO products (
           id, name, category, price, price_number, sku, type, color_name, color_hex, front_badge,
-          sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '01 / FRONT', ?, ?, '', '', '[]', '[]')
+          sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids, stock, stock_allocation
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '01 / FRONT', ?, ?, '', '', '[]', '[]', ?, ?)
       `,
-        [id, name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description]
+        [id, name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, stock, JSON.stringify(stockAllocation)]
       );
     }
 

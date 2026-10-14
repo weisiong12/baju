@@ -1,11 +1,11 @@
 export interface Product {
   id: string;
   name: string;
-  category: "TEES" | "SHORTS";
+  category: "TEES" | "SHORTS" | "HATS" | string;
   price: string;
   priceNumber: number;
   sku: string;
-  type: "tee" | "shorts";
+  type: "tee" | "shorts" | "hat" | string;
   colorName: string;
   colorHex: string;
   frontBadge: string;
@@ -13,8 +13,10 @@ export interface Product {
   description: string[];
   sizingNotes: string;
   shippingNotes: string;
-  swatches: { id: string; name: string; colorHex: string; type: "tee" | "shorts" }[];
+  swatches: { id: string; name: string; colorHex: string; type: "tee" | "shorts" | "hat" | string }[];
   similarProductIds: string[];
+  stock?: number;
+  stockAllocation?: Record<string, number>;
 }
 
 export const PRODUCTS_DATABASE: Record<string, Product> = {

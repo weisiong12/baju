@@ -7,46 +7,97 @@ import { Search, X } from "lucide-react";
 import { PRODUCTS_DATABASE, Product } from "../data/products";
 
 // Product Vector Visual for Search Results
-function SearchVisual({ type, colorHex }: { type: "tee" | "shorts"; colorHex: string }) {
-  if (type === "tee") {
+function SearchVisual({ type, colorHex }: { type: "tee" | "shorts" | "hat" | string; colorHex: string }) {
+  if (type === "hat") {
     return (
       <svg viewBox="0 0 160 140" className="w-4/5 h-4/5 drop-shadow-sm group-hover:scale-105 transition-transform duration-200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
-          d="M50 16 C60 28 100 28 110 16 L145 38 L126 64 L112 55 L112 130 L48 130 L48 55 L34 64 L15 38 Z"
+          d="M35 85 C35 38 125 38 125 85 Z"
           fill={colorHex}
           stroke={colorHex === "#ffffff" ? "#d4d4d8" : colorHex}
           strokeWidth="2"
-          strokeLinejoin="round"
         />
         <path
-          d="M50 16 C60 28 100 28 110 16 C100 22 60 22 50 16 Z"
-          fill={colorHex === "#ffffff" ? "#f4f4f5" : "rgba(0,0,0,0.2)"}
-          stroke={colorHex === "#ffffff" ? "#a1a1aa" : "rgba(255,255,255,0.25)"}
-          strokeWidth="1.5"
+          d="M20 85 C20 85 80 115 140 85 C132 80 120 78 110 78 L50 78 C40 78 28 80 20 85 Z"
+          fill={colorHex}
+          stroke={colorHex === "#ffffff" ? "#d4d4d8" : colorHex}
+          strokeWidth="2"
+        />
+        <rect
+          x="52"
+          y="52"
+          width="56"
+          height="20"
+          rx="2"
+          fill="rgba(0,0,0,0.15)"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="1"
         />
         <text
           x="80"
-          y="68"
+          y="65"
           fill={colorHex === "#ffffff" ? "#000000" : "#ffffff"}
-          fontSize="10"
+          fontSize="7"
           fontWeight="900"
           fontStyle="italic"
           textAnchor="middle"
+          letterSpacing="0.06em"
         >
           HOMEBOY
         </text>
+        <text
+          x="80"
+          y="71"
+          fill={colorHex === "#ffffff" ? "#52525b" : "rgba(255,255,255,0.7)"}
+          fontSize="4"
+          fontWeight="800"
+          textAnchor="middle"
+          letterSpacing="0.1em"
+        >
+          CAP CO.
+        </text>
+      </svg>
+    );
+  }
+  if (type === "shorts") {
+    return (
+      <svg viewBox="0 0 160 140" className="w-4/5 h-4/5 drop-shadow-sm group-hover:scale-105 transition-transform duration-200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="36" y="18" width="88" height="12" rx="2" fill={colorHex} stroke={colorHex} strokeWidth="2" />
+        <path d="M74 24 Q72 38 68 46 M86 24 Q88 38 92 46" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M36 28 L30 115 C30 118 64 122 74 116 L80 65 L86 116 C96 122 130 118 130 115 L124 28 Z" fill={colorHex} stroke={colorHex} strokeWidth="2" strokeLinejoin="round" />
+        <g transform="translate(86, 90) rotate(-6)">
+          <text x="0" y="0" fill="#ffffff" fontSize="8.5" fontWeight="900" fontStyle="italic">HOMEBOY</text>
+          <text x="2" y="9" fill="#ffffff" fontSize="7" fontWeight="900" fontStyle="italic">COLLECTION</text>
+        </g>
       </svg>
     );
   }
   return (
     <svg viewBox="0 0 160 140" className="w-4/5 h-4/5 drop-shadow-sm group-hover:scale-105 transition-transform duration-200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="36" y="18" width="88" height="12" rx="2" fill={colorHex} stroke={colorHex} strokeWidth="2" />
-      <path d="M74 24 Q72 38 68 46 M86 24 Q88 38 92 46" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M36 28 L30 115 C30 118 64 122 74 116 L80 65 L86 116 C96 122 130 118 130 115 L124 28 Z" fill={colorHex} stroke={colorHex} strokeWidth="2" strokeLinejoin="round" />
-      <g transform="translate(86, 90) rotate(-6)">
-        <text x="0" y="0" fill="#ffffff" fontSize="8.5" fontWeight="900" fontStyle="italic">HOMEBOY</text>
-        <text x="2" y="9" fill="#ffffff" fontSize="7" fontWeight="900" fontStyle="italic">COLLECTION</text>
-      </g>
+      <path
+        d="M50 16 C60 28 100 28 110 16 L145 38 L126 64 L112 55 L112 130 L48 130 L48 55 L34 64 L15 38 Z"
+        fill={colorHex}
+        stroke={colorHex === "#ffffff" ? "#d4d4d8" : colorHex}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M50 16 C60 28 100 28 110 16 C100 22 60 22 50 16 Z"
+        fill={colorHex === "#ffffff" ? "#f4f4f5" : "rgba(0,0,0,0.2)"}
+        stroke={colorHex === "#ffffff" ? "#a1a1aa" : "rgba(255,255,255,0.25)"}
+        strokeWidth="1.5"
+      />
+      <text
+        x="80"
+        y="68"
+        fill={colorHex === "#ffffff" ? "#000000" : "#ffffff"}
+        fontSize="10"
+        fontWeight="900"
+        fontStyle="italic"
+        textAnchor="middle"
+      >
+        HOMEBOY
+      </text>
     </svg>
   );
 }
@@ -68,7 +119,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       setTimeout(() => inputRef.current?.focus(), 50);
 
       // Fetch latest live products from database
-      fetch("/api/products", { cache: "no-store" })
+      fetch(`/api/products?_t=${Date.now()}`, { cache: "no-store" })
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
@@ -154,28 +205,54 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
           {/* 5-Column Grid Display (Matching screenshot 100%) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-start">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                onClick={() => handleSelectProduct(product.id)}
-                className="group cursor-pointer space-y-3"
-              >
-                {/* Visual Box */}
-                <div className="aspect-square bg-[#fafafa] border border-[#ebebeb] group-hover:border-black transition-all flex items-center justify-center p-4">
-                  <SearchVisual type={product.type} colorHex={product.colorHex} />
-                </div>
+            {filteredProducts.map((product) => {
+              const isSoldOut = product.stock !== undefined && product.stock <= 0;
+              return (
+                <div
+                  key={product.id}
+                  onClick={() => handleSelectProduct(product.id)}
+                  className="group cursor-pointer space-y-3 relative"
+                >
+                  {/* Visual Box */}
+                  <div className="aspect-square bg-[#fafafa] border border-[#ebebeb] group-hover:border-black transition-all flex items-center justify-center p-4 relative overflow-hidden">
+                    <SearchVisual
+                      type={
+                        product.type === "hat" || product.category === "HATS" || product.category === "HAT"
+                          ? "hat"
+                          : product.type === "shorts" || product.category === "SHORTS" || product.category === "PANTS"
+                          ? "shorts"
+                          : "tee"
+                      }
+                      colorHex={product.colorHex}
+                    />
+                    {isSoldOut && (
+                      <div className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
+                        <span className="bg-black text-white text-[8px] font-black tracking-widest px-2 py-1 uppercase transform -rotate-3">
+                          SOLD OUT
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Details */}
-                <div className="text-left space-y-0.5">
-                  <h4 className="font-body font-black text-[10px] tracking-wider uppercase text-black group-hover:underline truncate">
-                    {product.name}
-                  </h4>
-                  <p className="text-[9px] font-bold text-neutral-400 uppercase">
-                    {product.price}
-                  </p>
+                  {/* Details */}
+                  <div className="text-left space-y-0.5">
+                    <div className="flex items-center justify-between gap-1">
+                      <h4 className="font-body font-black text-[10px] tracking-wider uppercase text-black group-hover:underline truncate">
+                        {product.name}
+                      </h4>
+                      {isSoldOut && (
+                        <span className="text-[7.5px] font-black uppercase text-rose-600 bg-rose-50 border border-rose-200 px-1 py-0.2 shrink-0">
+                          SOLD OUT
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[9px] font-bold text-neutral-400 uppercase">
+                      {product.price}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {filteredProducts.length === 0 && (

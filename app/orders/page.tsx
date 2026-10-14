@@ -51,8 +51,17 @@ export interface OrderRecord {
 }
 
 // Mini Vector Shirt/Shorts Thumb for Order Items
-function ItemThumb({ type, colorHex }: { type?: "tee" | "shorts"; colorHex?: string }) {
+function ItemThumb({ type, colorHex }: { type?: "tee" | "shorts" | "hat" | string; colorHex?: string }) {
   const bg = colorHex || "#18181b";
+  if (type === "hat") {
+    return (
+      <svg viewBox="0 0 100 90" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 55 C22 25 78 25 78 55 Z" fill={bg} stroke={bg === "#ffffff" ? "#d4d4d8" : bg} strokeWidth="1.5" />
+        <path d="M12 55 C12 55 50 75 88 55 C82 52 75 50 68 50 L32 50 C25 50 18 52 12 55 Z" fill={bg} stroke={bg === "#ffffff" ? "#d4d4d8" : bg} strokeWidth="1.5" />
+        <text x="50" y="42" fill={bg === "#ffffff" ? "#000000" : "#ffffff"} fontSize="4.5" fontWeight="900" fontStyle="italic" textAnchor="middle">HB</text>
+      </svg>
+    );
+  }
   if (type === "shorts") {
     return (
       <svg viewBox="0 0 100 90" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">

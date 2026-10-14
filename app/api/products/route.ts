@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { pool, initDatabase, mapRowToProduct } from "@/app/lib/db";
 import { PRODUCTS_DATABASE } from "@/app/site/data/products";
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
 // GET /api/products
 export async function GET(request: Request) {
   try {
@@ -27,17 +33,18 @@ export async function GET(request: Request) {
       return NextResponse.json(
         category && category !== "ALL"
           ? list.filter((p) => p.category === category)
-          : list
+          : list,
+        { headers: NO_CACHE_HEADERS }
       );
     }
 
     const products = rows.map(mapRowToProduct);
-    return NextResponse.json(products);
+    return NextResponse.json(products, { headers: NO_CACHE_HEADERS });
   } catch (error: any) {
     console.error("Failed to fetch products from TiDB:", error);
     // Graceful fallback to static database so store never goes down
     const list = Object.values(PRODUCTS_DATABASE);
-    return NextResponse.json(list, { status: 200 });
+    return NextResponse.json(list, { status: 200, headers: NO_CACHE_HEADERS });
   }
 }
 
@@ -93,13 +100,18 @@ export async function POST(request: Request) {
     const shippingNotes = body.shippingNotes || "FREE STANDARD DELIVERY ACROSS WEST & EAST MALAYSIA.";
     const swatches = body.swatches || [{ id, name, colorHex, type }];
     const similarProductIds = body.similarProductIds || [];
+    const stockAllocation = body.stockAllocation || { S: 50, M: 50, L: 50, XL: 50, XXL: 50 };
+    const stock =
+      body.stock !== undefined && body.stock !== null
+        ? Number(body.stock)
+        : Object.values(stockAllocation).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
 
     await pool.query(
       `
       INSERT INTO products (
         id, name, category, price, price_number, sku, type, color_name, color_hex, front_badge,
-        sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids, stock, stock_allocation
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         id,
@@ -118,6 +130,8 @@ export async function POST(request: Request) {
         shippingNotes,
         JSON.stringify(swatches),
         JSON.stringify(similarProductIds),
+        stock,
+        JSON.stringify(stockAllocation),
       ]
     );
 

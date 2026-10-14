@@ -40,6 +40,8 @@ export async function initDatabase() {
         shipping_notes TEXT,
         swatches JSON,
         similar_product_ids JSON,
+        stock INT DEFAULT 250,
+        stock_allocation JSON,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -85,7 +87,7 @@ export async function initDatabase() {
 
     // 4. Correct any legacy mis-categorized items in DB
     try {
-      await connection.query("UPDATE products SET category = 'HATS', type = 'hat' WHERE UPPER(name) LIKE '%HAT%' AND category = 'TEES'");
+      await connection.query("UPDATE products SET category = 'HATS', type = 'hat' WHERE UPPER(name) LIKE '%HAT%' OR UPPER(category) IN ('HATS', 'HAT')");
       await connection.query("UPDATE products SET category = 'PANTS', type = 'shorts' WHERE UPPER(name) LIKE '%PANT%' AND category = 'TEES'");
     } catch (e) {
       // ignore
@@ -149,5 +151,7 @@ export function mapRowToProduct(row: any): Product {
     shippingNotes: row.shipping_notes || "",
     swatches: parseJson(row.swatches) || [],
     similarProductIds: parseJson(row.similar_product_ids) || [],
+    stock: row.stock !== null && row.stock !== undefined ? Number(row.stock) : 250,
+    stockAllocation: parseJson(row.stock_allocation) || { S: 50, M: 50, L: 50, XL: 50, XXL: 50 },
   };
 }

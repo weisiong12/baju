@@ -17,7 +17,7 @@ function StreetwearVisual({
   type,
   color,
 }: {
-  type?: "tee" | "shorts";
+  type?: "tee" | "shorts" | "hat" | string;
   color?: string;
 }) {
   const safeColor = color || "#18181b";
@@ -87,7 +87,7 @@ function StreetwearVisual({
           {/* FRONT VIEW (01 / FRONT)                                                   */}
           {/* ========================================================================= */}
           <div className="absolute inset-0 flex items-center justify-center backface-hidden">
-            {type === "tee" ? (
+            {type === "hat" ? (
               <svg
                 viewBox="0 0 160 140"
                 className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -95,23 +95,32 @@ function StreetwearVisual({
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M50 16 C60 28 100 28 110 16 L145 38 L126 64 L112 55 L112 130 L48 130 L48 55 L34 64 L15 38 Z"
+                  d="M35 85 C35 38 125 38 125 85 Z"
                   fill={safeColor}
                   stroke={safeColor === "#ffffff" ? "#d4d4d8" : safeColor}
                   strokeWidth="2"
-                  strokeLinejoin="round"
                 />
                 <path
-                  d="M50 16 C60 28 100 28 110 16 C100 22 60 22 50 16 Z"
-                  fill={safeColor === "#ffffff" ? "#f4f4f5" : "rgba(0,0,0,0.2)"}
-                  stroke={safeColor === "#ffffff" ? "#a1a1aa" : "rgba(255,255,255,0.25)"}
-                  strokeWidth="1.5"
+                  d="M20 85 C20 85 80 115 140 85 C132 80 120 78 110 78 L50 78 C40 78 28 80 20 85 Z"
+                  fill={safeColor}
+                  stroke={safeColor === "#ffffff" ? "#d4d4d8" : safeColor}
+                  strokeWidth="2"
+                />
+                <rect
+                  x="52"
+                  y="52"
+                  width="56"
+                  height="20"
+                  rx="2"
+                  fill="rgba(0,0,0,0.15)"
+                  stroke="rgba(255,255,255,0.3)"
+                  strokeWidth="1"
                 />
                 <text
                   x="80"
-                  y="68"
+                  y="65"
                   fill={safeColor === "#ffffff" ? "#000000" : "#ffffff"}
-                  fontSize="10"
+                  fontSize="7"
                   fontWeight="900"
                   fontStyle="italic"
                   textAnchor="middle"
@@ -119,8 +128,19 @@ function StreetwearVisual({
                 >
                   HOMEBOY
                 </text>
+                <text
+                  x="80"
+                  y="71"
+                  fill={safeColor === "#ffffff" ? "#52525b" : "rgba(255,255,255,0.7)"}
+                  fontSize="4"
+                  fontWeight="800"
+                  textAnchor="middle"
+                  letterSpacing="0.1em"
+                >
+                  CAP CO.
+                </text>
               </svg>
-            ) : (
+            ) : type === "shorts" ? (
               <svg
                 viewBox="0 0 160 140"
                 className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -181,6 +201,39 @@ function StreetwearVisual({
                   </text>
                 </g>
               </svg>
+            ) : (
+              <svg
+                viewBox="0 0 160 140"
+                className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M50 16 C60 28 100 28 110 16 L145 38 L126 64 L112 55 L112 130 L48 130 L48 55 L34 64 L15 38 Z"
+                  fill={safeColor}
+                  stroke={safeColor === "#ffffff" ? "#d4d4d8" : safeColor}
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M50 16 C60 28 100 28 110 16 C100 22 60 22 50 16 Z"
+                  fill={safeColor === "#ffffff" ? "#f4f4f5" : "rgba(0,0,0,0.2)"}
+                  stroke={safeColor === "#ffffff" ? "#a1a1aa" : "rgba(255,255,255,0.25)"}
+                  strokeWidth="1.5"
+                />
+                <text
+                  x="80"
+                  y="68"
+                  fill={safeColor === "#ffffff" ? "#000000" : "#ffffff"}
+                  fontSize="10"
+                  fontWeight="900"
+                  fontStyle="italic"
+                  textAnchor="middle"
+                  letterSpacing="0.06em"
+                >
+                  HOMEBOY
+                </text>
+              </svg>
             )}
           </div>
 
@@ -191,7 +244,124 @@ function StreetwearVisual({
             className="absolute inset-0 flex items-center justify-center backface-hidden"
             style={{ transform: "rotateY(180deg)" }}
           >
-            {type === "tee" ? (
+            {type === "hat" ? (
+              <svg
+                viewBox="0 0 160 140"
+                className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M35 85 C35 38 125 38 125 85 Z"
+                  fill={safeColor}
+                  stroke={safeColor === "#ffffff" ? "#d4d4d8" : safeColor}
+                  strokeWidth="2"
+                />
+                <path
+                  d="M60 85 C60 65 100 65 100 85 Z"
+                  fill="#fafafa"
+                  stroke={safeColor === "#ffffff" ? "#d4d4d8" : safeColor}
+                  strokeWidth="2"
+                />
+                <rect
+                  x="52"
+                  y="78"
+                  width="56"
+                  height="7"
+                  rx="1.5"
+                  fill="#18181b"
+                  stroke="rgba(255,255,255,0.4)"
+                  strokeWidth="0.8"
+                />
+                <rect
+                  x="74"
+                  y="76"
+                  width="12"
+                  height="11"
+                  rx="1"
+                  fill="#d4af37"
+                  stroke="#000000"
+                  strokeWidth="1"
+                />
+                <text
+                  x="80"
+                  y="52"
+                  fill={safeColor === "#ffffff" ? "#000000" : "#ffffff"}
+                  fontSize="6"
+                  fontWeight="900"
+                  fontStyle="italic"
+                  textAnchor="middle"
+                >
+                  HB ARCHIVE
+                </text>
+              </svg>
+            ) : type === "shorts" ? (
+              <svg
+                viewBox="0 0 160 140"
+                className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="36"
+                  y="18"
+                  width="88"
+                  height="12"
+                  rx="2"
+                  fill={safeColor}
+                  stroke={safeColor}
+                  strokeWidth="2"
+                />
+                <rect
+                  x="88"
+                  y="20"
+                  width="24"
+                  height="8"
+                  rx="1"
+                  fill="#000000"
+                  stroke="rgba(255,255,255,0.4)"
+                  strokeWidth="0.8"
+                />
+                <text
+                  x="100"
+                  y="26"
+                  fill="#ffffff"
+                  fontSize="4"
+                  fontWeight="900"
+                  textAnchor="middle"
+                >
+                  HB CO.
+                </text>
+                <path
+                  d="M36 28 L30 115 C30 118 64 122 74 116 L80 65 L86 116 C96 122 130 118 130 115 L124 28 Z"
+                  fill={safeColor}
+                  stroke={safeColor}
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <rect
+                  x="86"
+                  y="45"
+                  width="30"
+                  height="32"
+                  rx="2"
+                  fill="rgba(0,0,0,0.12)"
+                  stroke="rgba(255,255,255,0.25)"
+                  strokeWidth="1.2"
+                />
+                <text
+                  x="101"
+                  y="63"
+                  fill="#ffffff"
+                  fontSize="5"
+                  fontWeight="900"
+                  textAnchor="middle"
+                  opacity="0.8"
+                >
+                  BACK POCKET
+                </text>
+              </svg>
+            ) : (
               <svg
                 viewBox="0 0 160 140"
                 className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -268,72 +438,6 @@ function StreetwearVisual({
                   <rect x="30" y="0" width="2" height="12" fill={safeColor === "#ffffff" ? "#000" : "#fff"} />
                 </g>
               </svg>
-            ) : (
-              <svg
-                viewBox="0 0 160 140"
-                className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect
-                  x="36"
-                  y="18"
-                  width="88"
-                  height="12"
-                  rx="2"
-                  fill={safeColor}
-                  stroke={safeColor}
-                  strokeWidth="2"
-                />
-                <rect
-                  x="88"
-                  y="20"
-                  width="24"
-                  height="8"
-                  rx="1"
-                  fill="#000000"
-                  stroke="rgba(255,255,255,0.4)"
-                  strokeWidth="0.8"
-                />
-                <text
-                  x="100"
-                  y="26"
-                  fill="#ffffff"
-                  fontSize="4"
-                  fontWeight="900"
-                  textAnchor="middle"
-                >
-                  HB CO.
-                </text>
-                <path
-                  d="M36 28 L30 115 C30 118 64 122 74 116 L80 65 L86 116 C96 122 130 118 130 115 L124 28 Z"
-                  fill={safeColor}
-                  stroke={safeColor}
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
-                <rect
-                  x="86"
-                  y="45"
-                  width="30"
-                  height="32"
-                  rx="2"
-                  fill="rgba(0,0,0,0.12)"
-                  stroke="rgba(255,255,255,0.25)"
-                  strokeWidth="1.2"
-                />
-                <text
-                  x="101"
-                  y="63"
-                  fill="#ffffff"
-                  fontSize="5"
-                  fontWeight="900"
-                  textAnchor="middle"
-                  opacity="0.8"
-                >
-                  BACK POCKET
-                </text>
-              </svg>
             )}
           </div>
         </div>
@@ -379,33 +483,69 @@ function ProductDetailPageContent() {
 
   const [allProducts, setAllProducts] = useState<Product[]>(Object.values(PRODUCTS_DATABASE));
 
-  useEffect(() => {
-    // Fetch all products for swatches & recommendations
-    fetch("/api/products")
+  const refreshCurrentProduct = React.useCallback(() => {
+    if (!productId) return;
+    fetch(`/api/products/${productId}?_t=${Date.now()}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.id) {
+          setProduct(data);
+        }
+      })
+      .catch((err) => console.log("Live product refresh:", err));
+
+    fetch(`/api/products?_t=${Date.now()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setAllProducts(data);
-          const found = data.find((p: any) => p.id === productId);
-          if (found) {
-            setProduct(found);
-          }
         }
       })
-      .catch((err) => console.log("Cached all products:", err));
-
-    // Fetch this specific product
-    if (productId) {
-      fetch(`/api/products/${productId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.id) {
-            setProduct(data);
-          }
-        })
-        .catch((err) => console.log("Using cached product:", err));
-    }
+      .catch((err) => console.log("Live all products refresh:", err));
   }, [productId]);
+
+  useEffect(() => {
+    refreshCurrentProduct();
+
+    // 1. Instant cross-tab real-time sync via BroadcastChannel
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("homeboy-stock-sync");
+      bc.onmessage = () => {
+        refreshCurrentProduct();
+      };
+    } catch (e) {
+      // ignore
+    }
+
+    // 2. Cross-tab sync via localStorage storage event
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "hb_stock_updated") {
+        refreshCurrentProduct();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // 3. Tab visibility/focus auto refresh
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshCurrentProduct();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", refreshCurrentProduct);
+
+    // 4. Polling interval every 2 seconds
+    const interval = setInterval(refreshCurrentProduct, 2000);
+
+    return () => {
+      if (bc) bc.close();
+      window.removeEventListener("storage", handleStorage);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", refreshCurrentProduct);
+      clearInterval(interval);
+    };
+  }, [refreshCurrentProduct]);
 
   const { addToCart } = useCart();
 
@@ -415,14 +555,34 @@ function ProductDetailPageContent() {
   const [sizingOpen, setSizingOpen] = useState(false);
   const [shippingOpen, setShippingOpen] = useState(true);
 
+  const effectiveType =
+    product.type === "hat" || product.category === "HATS" || product.category === "HAT"
+      ? "hat"
+      : product.type === "shorts" || product.category === "SHORTS" || product.category === "PANTS"
+      ? "shorts"
+      : "tee";
+
+  const isOverallSoldOut = product.stock !== undefined && product.stock <= 0;
+  const sizeStock =
+    product.stockAllocation && product.stockAllocation[selectedSize] !== undefined
+      ? Number(product.stockAllocation[selectedSize])
+      : product.stock !== undefined
+      ? product.stock
+      : 50;
+  const isCurrentSizeSoldOut = isOverallSoldOut || sizeStock <= 0;
+
   const handleAddToCart = () => {
+    if (isCurrentSizeSoldOut) {
+      alert("This piece / size is currently SOLD OUT.");
+      return;
+    }
     addToCart({
       productId: product.id,
       name: product.name.toUpperCase(),
       size: selectedSize,
       price: product.priceNumber || 99.0,
       quantity: quantity,
-      type: product.type || "tee",
+      type: effectiveType,
       colorHex: product.colorHex || "#18181b",
     });
   };
@@ -435,11 +595,17 @@ function ProductDetailPageContent() {
             id: p.id,
             name: p.name,
             colorHex: p.colorHex || "#18181b",
-            type: p.type || (product.category === "SHORTS" ? "shorts" : "tee"),
+            type:
+              p.type ||
+              (p.category === "HATS" || p.category === "HAT"
+                ? "hat"
+                : p.category === "SHORTS" || p.category === "PANTS"
+                ? "shorts"
+                : "tee"),
           }))
       : product.swatches && product.swatches.length > 0
       ? product.swatches
-      : [{ id: product.id, name: product.name, colorHex: product.colorHex || "#18181b", type: product.type || "tee" }];
+      : [{ id: product.id, name: product.name, colorHex: product.colorHex || "#18181b", type: effectiveType }];
 
   const similarProducts = (product.similarProductIds || [])
     .map((id) => allProducts.find((p) => p.id === id) || PRODUCTS_DATABASE[id])
@@ -453,6 +619,8 @@ function ProductDetailPageContent() {
   const sizesList =
     product.sizes && product.sizes.length > 0
       ? product.sizes
+      : effectiveType === "hat"
+      ? ["ONE SIZE"]
       : ["S", "M", "L", "XL", "XXL"];
 
   const descList = Array.isArray(product.description)
@@ -495,18 +663,34 @@ function ProductDetailPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* Left Column: Product Showcase Container with 3D Flip */}
           <div className="md:col-span-7 bg-[#fafafa] border border-[#f0f0f0] aspect-square relative flex items-center justify-center p-4 overflow-hidden">
+            {isOverallSoldOut && (
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-40 pointer-events-none">
+                <span className="bg-black text-white text-xs md:text-sm font-black tracking-[0.3em] uppercase px-6 py-2.5 shadow-xl border border-black transform -rotate-3">
+                  SOLD OUT
+                </span>
+              </div>
+            )}
             {/* Product Visual */}
-            <StreetwearVisual type={product.type || "tee"} color={product.colorHex} />
+            <StreetwearVisual type={effectiveType} color={product.colorHex} />
           </div>
 
           {/* Right Column: Details & Purchasing Controls */}
           <div className="md:col-span-5 space-y-6">
             {/* Header info */}
             <div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="bg-black text-white text-[7.5px] font-black tracking-widest uppercase px-1.5 py-0.5">
                   ORIGINAL
                 </span>
+                {isOverallSoldOut ? (
+                  <span className="bg-rose-600 text-white text-[7.5px] font-black tracking-widest uppercase px-1.5 py-0.5 animate-pulse">
+                    SOLD OUT
+                  </span>
+                ) : isCurrentSizeSoldOut ? (
+                  <span className="bg-amber-600 text-white text-[7.5px] font-black tracking-widest uppercase px-1.5 py-0.5">
+                    SIZE {selectedSize} SOLD OUT
+                  </span>
+                ) : null}
                 <span className="text-[8.5px] font-bold tracking-widest text-neutral-400 uppercase">
                   {product.sku || "HB-001-ORIGINAL"}
                 </span>
@@ -523,6 +707,11 @@ function ProductDetailPageContent() {
                 <span className="text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
                   / VAT INCL.
                 </span>
+                {isOverallSoldOut && (
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 ml-2">
+                    [ SOLD OUT ]
+                  </span>
+                )}
               </div>
             </div>
 
@@ -553,31 +742,60 @@ function ProductDetailPageContent() {
 
             {/* Select Size */}
             <div className="space-y-2">
-              <label className="block text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
-                SELECT SIZE
-              </label>
-              <div className="flex items-center gap-1.5">
-                {sizesList.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-9 h-9 text-[9.5px] font-black uppercase transition-all cursor-pointer border ${
-                      selectedSize === size
-                        ? "bg-black text-white border-black"
-                        : "bg-white text-black border-neutral-200 hover:border-black"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+              <div className="flex items-center justify-between">
+                <label className="block text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
+                  SELECT SIZE
+                </label>
+                {isCurrentSizeSoldOut && (
+                  <span className="text-[8px] font-bold tracking-wider text-rose-600 uppercase">
+                    SIZE {selectedSize} IS SOLD OUT
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {sizesList.map((size) => {
+                  const sStock =
+                    product.stockAllocation && product.stockAllocation[size] !== undefined
+                      ? Number(product.stockAllocation[size])
+                      : (product.stock ?? 50);
+                  const sizeIsSoldOut = isOverallSoldOut || sStock <= 0;
+
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`w-9 h-9 text-[9.5px] font-black uppercase transition-all cursor-pointer border relative ${
+                        selectedSize === size
+                          ? "bg-black text-white border-black"
+                          : sizeIsSoldOut
+                          ? "bg-neutral-100 text-neutral-400 border-neutral-200 hover:border-neutral-400"
+                          : "bg-white text-black border-neutral-200 hover:border-black"
+                      }`}
+                    >
+                      <span className={sizeIsSoldOut && selectedSize !== size ? "line-through opacity-70" : ""}>
+                        {size}
+                      </span>
+                      {sizeIsSoldOut && (
+                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Quantity and Add to Cart Row */}
             <div className="flex items-center gap-3 pt-2">
               {/* Quantity Selector */}
-              <div className="flex items-center border border-neutral-200 bg-white h-11 px-2 shrink-0">
+              <div
+                className={`flex items-center border border-neutral-200 bg-white h-11 px-2 shrink-0 ${
+                  isCurrentSizeSoldOut ? "opacity-40 pointer-events-none bg-neutral-100" : ""
+                }`}
+              >
                 <button
+                  disabled={isCurrentSizeSoldOut}
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   className="w-6 h-full flex items-center justify-center text-neutral-400 hover:text-black cursor-pointer"
                 >
@@ -587,7 +805,8 @@ function ProductDetailPageContent() {
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity((q) => q + 1)}
+                  disabled={isCurrentSizeSoldOut}
+                  onClick={() => setQuantity((q) => (sizeStock > 0 ? Math.min(sizeStock, q + 1) : q + 1))}
                   className="w-6 h-full flex items-center justify-center text-neutral-400 hover:text-black cursor-pointer"
                 >
                   <Plus className="w-3 h-3" />
@@ -595,21 +814,42 @@ function ProductDetailPageContent() {
               </div>
 
               {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 h-11 bg-black text-white hover:bg-neutral-800 text-[10px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer shadow-md"
-              >
-                ADD TO CART
-              </button>
+              {isCurrentSizeSoldOut ? (
+                <button
+                  disabled
+                  className="flex-1 h-11 bg-neutral-200 text-neutral-500 text-[10px] font-black uppercase tracking-[0.2em] border border-neutral-300 cursor-not-allowed flex items-center justify-center gap-2 select-none"
+                >
+                  <span className="inline-block w-2 h-2 rounded-full bg-rose-500"></span>
+                  <span>SOLD OUT</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 h-11 bg-black text-white hover:bg-neutral-800 text-[10px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer shadow-md"
+                >
+                  ADD TO CART
+                </button>
+              )}
             </div>
 
             {/* Buy It Now Button */}
-            <button
-              onClick={handleAddToCart}
-              className="w-full h-11 border border-neutral-300 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-neutral-50 transition-all cursor-pointer"
-            >
-              BUY IT NOW
-            </button>
+            {isCurrentSizeSoldOut ? (
+              <div className="w-full py-2.5 px-3 bg-neutral-50 border border-neutral-200 text-center">
+                <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-rose-600">
+                  ⚠️ THIS PIECE / SIZE IS CURRENTLY SOLD OUT (CANNOT CHECKOUT)
+                </span>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  handleAddToCart();
+                  router.push("/checkout");
+                }}
+                className="w-full h-11 border border-neutral-300 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-neutral-50 transition-all cursor-pointer"
+              >
+                BUY IT NOW
+              </button>
+            )}
 
             {/* Accordion List */}
             <div className="pt-4 border-t border-neutral-100 divide-y divide-neutral-100">

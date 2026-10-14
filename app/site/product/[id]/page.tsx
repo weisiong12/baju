@@ -17,9 +17,65 @@ function StreetwearVisual({
   type,
   color,
 }: {
-  type: "tee" | "shorts";
+  type: "tee" | "shorts" | "hat" | string;
   color: string;
 }) {
+  if (type === "hat") {
+    return (
+      <svg
+        viewBox="0 0 160 140"
+        className="w-4/5 h-4/5 drop-shadow-md"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M35 85 C35 38 125 38 125 85 Z"
+          fill={color}
+          stroke={color === "#ffffff" ? "#d4d4d8" : color}
+          strokeWidth="2"
+        />
+        <path
+          d="M20 85 C20 85 80 115 140 85 C132 80 120 78 110 78 L50 78 C40 78 28 80 20 85 Z"
+          fill={color}
+          stroke={color === "#ffffff" ? "#d4d4d8" : color}
+          strokeWidth="2"
+        />
+        <rect
+          x="52"
+          y="52"
+          width="56"
+          height="20"
+          rx="2"
+          fill="rgba(0,0,0,0.15)"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="1"
+        />
+        <text
+          x="80"
+          y="65"
+          fill={color === "#ffffff" ? "#000000" : "#ffffff"}
+          fontSize="7"
+          fontWeight="900"
+          fontStyle="italic"
+          textAnchor="middle"
+          letterSpacing="0.06em"
+        >
+          HOMEBOY
+        </text>
+        <text
+          x="80"
+          y="71"
+          fill={color === "#ffffff" ? "#52525b" : "rgba(255,255,255,0.7)"}
+          fontSize="4"
+          fontWeight="800"
+          textAnchor="middle"
+          letterSpacing="0.1em"
+        >
+          CAP CO.
+        </text>
+      </svg>
+    );
+  }
   if (type === "tee") {
     return (
       <svg
@@ -186,7 +242,16 @@ function ProductDetailPageContent() {
             </div>
 
             {/* Product Visual */}
-            <StreetwearVisual type={product.type} color={product.colorHex} />
+            <StreetwearVisual
+              type={
+                product.type === "hat" || (product as any).category === "HATS" || (product as any).category === "HAT"
+                  ? "hat"
+                  : product.type === "shorts" || (product as any).category === "SHORTS" || (product as any).category === "PANTS"
+                  ? "shorts"
+                  : "tee"
+              }
+              color={product.colorHex}
+            />
           </div>
 
           {/* Right Column: Details & Purchasing Controls */}
