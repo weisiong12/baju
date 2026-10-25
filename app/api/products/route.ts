@@ -106,12 +106,17 @@ export async function POST(request: Request) {
         ? Number(body.stock)
         : Object.values(stockAllocation).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
 
+    const frontImage = body.frontImage || null;
+    const backImage = body.backImage || null;
+    const images = body.images || (frontImage ? [frontImage, ...(backImage ? [backImage] : [])] : []);
+
     await pool.query(
       `
       INSERT INTO products (
         id, name, category, price, price_number, sku, type, color_name, color_hex, front_badge,
-        sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids, stock, stock_allocation
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids, stock, stock_allocation,
+        front_image, back_image, images
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         id,
@@ -132,6 +137,9 @@ export async function POST(request: Request) {
         JSON.stringify(similarProductIds),
         stock,
         JSON.stringify(stockAllocation),
+        frontImage,
+        backImage,
+        JSON.stringify(images),
       ]
     );
 

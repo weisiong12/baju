@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import R2MediaModal from "../components/R2MediaModal";
 import {
   Search,
   ChevronDown,
@@ -13,6 +14,9 @@ import {
   Trash2,
   X,
   Upload,
+  Cloud,
+  RefreshCw,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export const COLOR_PRESETS = [
@@ -258,6 +262,8 @@ interface AdminProduct {
   stockAllocation?: Record<string, number>;
   sizes: string[];
   category: string;
+  frontImage?: string | null;
+  backImage?: string | null;
 }
 
 function notifyStockSync() {
@@ -354,12 +360,20 @@ function notifyStockSync() {
             stockAllocation: p.stockAllocation || { S: 50, M: 50, L: 50, XL: 50, XXL: 50 },
             sizes: p.sizes || ["S", "M", "L", "XL", "XXL"],
             category: p.category || "TEES",
+            frontImage: p.frontImage || null,
+            backImage: p.backImage || null,
           }));
           setProducts(mapped);
         }
       })
       .catch((err) => console.log("Cached admin products:", err));
   }, []);
+
+  // Cloudflare R2 Media Modal States
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [mediaSelectTarget, setMediaSelectTarget] = useState<
+    "new-front" | "new-back" | "edit-front" | "edit-back" | null
+  >(null);
 
   // Form states for Publish New Piece modal
   const [newTitle, setNewTitle] = useState("");
@@ -370,6 +384,8 @@ function notifyStockSync() {
   const [newShirtColor, setNewShirtColor] = useState("#ffffff");
   const [frontImage, setFrontImage] = useState<string | null>(null);
   const [backImage, setBackImage] = useState<string | null>(null);
+  const [isUploadingFront, setIsUploadingFront] = useState(false);
+  const [isUploadingBack, setIsUploadingBack] = useState(false);
 
   // Form states for MODIFY PIECE modal
   const [editId, setEditId] = useState("");
@@ -381,6 +397,11 @@ function notifyStockSync() {
     "- OVERSIZED FIT\n- 230 GMS 100% COTTON\n- WHITE\n- ALL SALES ARE FINAL NO RETURN NO REFUNDS"
   );
   const [editShirtColor, setEditShirtColor] = useState("#ffffff");
+  const [editFrontImage, setEditFrontImage] = useState<string | null>(null);
+  const [editBackImage, setEditBackImage] = useState<string | null>(null);
+  const [isUploadingEditFront, setIsUploadingEditFront] = useState(false);
+  const [isUploadingEditBack, setIsUploadingEditBack] = useState(false);
+
   const [editStockAllocation, setEditStockAllocation] = useState({
     S: 49,
     M: 50,
@@ -399,6 +420,8 @@ function notifyStockSync() {
 
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
+  const editFrontInputRef = useRef<HTMLInputElement>(null);
+  const editBackInputRef = useRef<HTMLInputElement>(null);
 
   const handleStockChange = (size: "S" | "M" | "L" | "XL" | "XXL", val: string) => {
     const num = parseInt(val) || 0;
@@ -410,12 +433,89 @@ function notifyStockSync() {
     setEditStockAllocation((prev) => ({ ...prev, [size]: num }));
   };
 
+  // Upload file helper sending to /api/upload (Cloudflare R2)
+  const uploadImageFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "products");
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Failed to upload image to Cloudflare R2");
+    }
+
+    return data.url;
+  };
+
+  // Upload handler for ADD NEW PIECE
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "front" | "back"
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (type === "front") setIsUploadingFront(true);
+    else setIsUploadingBack(true);
+
+    try {
+      const url = await uploadImageFile(file);
+      if (type === "front") setFrontImage(url);
+      else setBackImage(url);
+    } catch (err: any) {
+      alert(err.message || "Failed to upload to Cloudflare R2");
+    } finally {
+      if (type === "front") setIsUploadingFront(false);
+      else setIsUploadingBack(false);
+      e.target.value = "";
+    }
+  };
+
+  // Upload handler for MODIFY PIECE
+  const handleEditImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "front" | "back"
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (type === "front") setIsUploadingEditFront(true);
+    else setIsUploadingEditBack(true);
+
+    try {
+      const url = await uploadImageFile(file);
+      if (type === "front") setEditFrontImage(url);
+      else setEditBackImage(url);
+    } catch (err: any) {
+      alert(err.message || "Failed to upload to Cloudflare R2");
+    } finally {
+      if (type === "front") setIsUploadingEditFront(false);
+      else setIsUploadingEditBack(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleSelectFromR2 = (url: string) => {
+    if (mediaSelectTarget === "new-front") setFrontImage(url);
+    else if (mediaSelectTarget === "new-back") setBackImage(url);
+    else if (mediaSelectTarget === "edit-front") setEditFrontImage(url);
+    else if (mediaSelectTarget === "edit-back") setEditBackImage(url);
+    setMediaSelectTarget(null);
+  };
+
   // Open Edit Modal with pre-filled item data
   const handleOpenEditModal = (item: any) => {
     setEditId(item.id);
     setEditTitle(item.name);
     setEditPrice(item.price.replace("RM ", "").trim());
     setEditShirtColor(item.shirtColor || "#ffffff");
+    setEditFrontImage(item.frontImage || null);
+    setEditBackImage(item.backImage || null);
 
     const skuParts = (item.sku || "").split("•");
     setEditSegment(skuParts[0]?.trim() || "TEE");
@@ -477,6 +577,8 @@ function notifyStockSync() {
             shirtColor: editShirtColor,
             logoColor: editShirtColor === "#ffffff" ? "#000000" : "#ffffff",
             category: finalCategory,
+            frontImage: editFrontImage,
+            backImage: editBackImage,
           };
         }
         return p;
@@ -502,6 +604,8 @@ function notifyStockSync() {
           description: editNarrative.split("\n").filter((l) => l.trim()),
           stock: totalStock,
           stockAllocation: editStockAllocation,
+          frontImage: editFrontImage,
+          backImage: editBackImage,
         }),
       });
       notifyStockSync();
@@ -545,6 +649,8 @@ function notifyStockSync() {
       stockAllocation,
       sizes: ["S", "M", "L", "XL", "XXL"],
       category: finalCategory,
+      frontImage,
+      backImage,
     };
 
     setProducts([newProduct, ...products]);
@@ -593,6 +699,8 @@ function notifyStockSync() {
           description: narrativeLines,
           stock: totalStock,
           stockAllocation,
+          frontImage,
+          backImage,
         }),
       });
       notifyStockSync();
@@ -607,18 +715,6 @@ function notifyStockSync() {
     setNewShirtColor("#ffffff");
     setFrontImage(null);
     setBackImage(null);
-  };
-
-  const handleImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "front" | "back"
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      if (type === "front") setFrontImage(url);
-      else setBackImage(url);
-    }
   };
 
   const handleDelete = async (id: string) => {
@@ -681,14 +777,28 @@ function notifyStockSync() {
               </h1>
             </div>
 
-            {/* + ADD NEW PIECE Button */}
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="bg-black text-white px-5 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-neutral-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[3]" />
-              <span>ADD NEW PIECE</span>
-            </button>
+            {/* Actions: R2 Media Assets & + ADD NEW PIECE Button */}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setMediaSelectTarget(null);
+                  setShowMediaModal(true);
+                }}
+                className="bg-white border border-black text-black px-4 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Cloud className="w-3.5 h-3.5" />
+                <span>R2 MEDIA ASSETS</span>
+              </button>
+
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="bg-black text-white px-5 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-neutral-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <span>ADD NEW PIECE</span>
+              </button>
+            </div>
           </div>
 
           {/* Search & Filter Toolbar Box */}
@@ -787,18 +897,31 @@ function notifyStockSync() {
                     <GripVertical className="w-4 h-4 text-neutral-300 shrink-0 cursor-grab" />
 
                     {/* Thumbnail Box */}
-                    <div className="w-16 h-16 bg-[#fafafa] border border-[#e5e5e5] flex items-center justify-center p-1 shrink-0">
-                      <ShirtGraphic
-                        type={
-                          item.category === "SHORTS" || item.category === "PANTS" || (item.sku && item.sku.includes("SHORTS"))
-                            ? "shorts"
-                            : item.category === "HATS" || item.category === "HAT" || (item.sku && item.sku.includes("HAT"))
-                            ? "hat"
-                            : "tee"
-                        }
-                        color={item.shirtColor}
-                        logoColor={item.logoColor}
-                      />
+                    <div className="w-16 h-16 bg-[#fafafa] border border-[#e5e5e5] flex items-center justify-center p-1 shrink-0 overflow-hidden relative">
+                      {item.frontImage ? (
+                        <img
+                          src={item.frontImage}
+                          alt={item.name}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <ShirtGraphic
+                          type={
+                            item.category === "SHORTS" || item.category === "PANTS" || (item.sku && item.sku.includes("SHORTS"))
+                              ? "shorts"
+                              : item.category === "HATS" || item.category === "HAT" || (item.sku && item.sku.includes("HAT"))
+                              ? "hat"
+                              : "tee"
+                          }
+                          color={item.shirtColor}
+                          logoColor={item.logoColor}
+                        />
+                      )}
+                      {item.frontImage && (
+                        <span className="absolute bottom-0 right-0 bg-black text-[6.5px] font-black text-white px-1 leading-tight tracking-widest uppercase">
+                          R2
+                        </span>
+                      )}
                     </div>
 
                     {/* Info */}
@@ -900,51 +1023,207 @@ function notifyStockSync() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Primary Front Silhouette */}
                     <div>
-                      <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase mb-2">
-                        PRIMARY FRONT SILHOUETTE
-                      </label>
-                      <div className="h-64 bg-white border border-dashed border-[#e5e5e5] flex items-center justify-center relative p-4 group">
-                        <button
-                          type="button"
-                          className="absolute top-3 right-3 w-6 h-6 bg-black text-white flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-all shadow-xs"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                        <ModalFrontVisual
-                          type={
-                            editSegment.toUpperCase() === "SHORTS" || editSegment.toUpperCase() === "PANTS"
-                              ? "shorts"
-                              : editSegment.toUpperCase() === "HATS" || editSegment.toUpperCase() === "HAT"
-                              ? "hat"
-                              : "tee"
-                          }
-                          colorHex={editShirtColor}
-                        />
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+                          PRIMARY FRONT SILHOUETTE
+                        </label>
+                        <span className="text-[7.5px] font-black text-neutral-400 tracking-wider uppercase">
+                          CLOUDFLARE R2
+                        </span>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={editFrontInputRef}
+                        onChange={(e) => handleEditImageUpload(e, "front")}
+                        className="hidden"
+                      />
+                      <div className="h-64 bg-white border border-dashed border-[#e5e5e5] hover:border-black flex flex-col items-center justify-center relative p-4 group transition-all">
+                        {isUploadingEditFront ? (
+                          <div className="flex flex-col items-center justify-center gap-2 text-black">
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            <span className="text-[8.5px] font-black tracking-widest uppercase">
+                              UPLOADING TO R2...
+                            </span>
+                          </div>
+                        ) : editFrontImage ? (
+                          <>
+                            <img
+                              src={editFrontImage}
+                              alt="Edit Front Silhouette"
+                              className="max-h-52 object-contain"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setEditFrontImage(null)}
+                              title="Remove photo"
+                              className="absolute top-3 right-3 w-6 h-6 bg-black text-white flex items-center justify-center cursor-pointer hover:bg-red-600 transition-all shadow-xs"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={() => editFrontInputRef.current?.click()}
+                                className="bg-black/90 text-white text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-black transition-all shadow-xs cursor-pointer"
+                              >
+                                REPLACE
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("edit-front");
+                                  setShowMediaModal(true);
+                                }}
+                                className="bg-white border border-black text-black text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-neutral-100 transition-all shadow-xs cursor-pointer"
+                              >
+                                R2 LIBRARY
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <ModalFrontVisual
+                              type={
+                                editSegment.toUpperCase() === "SHORTS" || editSegment.toUpperCase() === "PANTS"
+                                  ? "shorts"
+                                  : editSegment.toUpperCase() === "HATS" || editSegment.toUpperCase() === "HAT"
+                                  ? "hat"
+                                  : "tee"
+                              }
+                              colorHex={editShirtColor}
+                            />
+                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity backdrop-blur-[1px]">
+                              <button
+                                type="button"
+                                onClick={() => editFrontInputRef.current?.click()}
+                                className="w-9 h-9 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center text-black hover:scale-105 transition-transform cursor-pointer"
+                              >
+                                <Upload className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => editFrontInputRef.current?.click()}
+                                className="text-[8px] font-black tracking-widest text-black uppercase bg-white/95 px-2.5 py-1 shadow-xs border border-neutral-200 hover:bg-black hover:text-white transition-all cursor-pointer"
+                              >
+                                UPLOAD PHOTO TO R2
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("edit-front");
+                                  setShowMediaModal(true);
+                                }}
+                                className="text-[7.5px] font-black tracking-widest text-neutral-600 uppercase bg-white/90 px-2 py-0.5 border border-neutral-200 hover:text-black cursor-pointer"
+                              >
+                                OR PICK FROM R2
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
 
                     {/* Secondary Back Vision */}
                     <div>
-                      <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase mb-2">
-                        SECONDARY BACK VISION
-                      </label>
-                      <div className="h-64 bg-white border border-dashed border-[#e5e5e5] flex items-center justify-center relative p-4 group">
-                        <button
-                          type="button"
-                          className="absolute top-3 right-3 w-6 h-6 bg-black text-white flex items-center justify-center cursor-pointer hover:bg-neutral-800 transition-all shadow-xs"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                        <ModalBackVisual
-                          type={
-                            editSegment.toUpperCase() === "SHORTS" || editSegment.toUpperCase() === "PANTS"
-                              ? "shorts"
-                              : editSegment.toUpperCase() === "HATS" || editSegment.toUpperCase() === "HAT"
-                              ? "hat"
-                              : "tee"
-                          }
-                          colorHex={editShirtColor}
-                        />
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+                          SECONDARY BACK VISION
+                        </label>
+                        <span className="text-[7.5px] font-black text-neutral-400 tracking-wider uppercase">
+                          CLOUDFLARE R2
+                        </span>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={editBackInputRef}
+                        onChange={(e) => handleEditImageUpload(e, "back")}
+                        className="hidden"
+                      />
+                      <div className="h-64 bg-white border border-dashed border-[#e5e5e5] hover:border-black flex flex-col items-center justify-center relative p-4 group transition-all">
+                        {isUploadingEditBack ? (
+                          <div className="flex flex-col items-center justify-center gap-2 text-black">
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            <span className="text-[8.5px] font-black tracking-widest uppercase">
+                              UPLOADING TO R2...
+                            </span>
+                          </div>
+                        ) : editBackImage ? (
+                          <>
+                            <img
+                              src={editBackImage}
+                              alt="Edit Back Vision"
+                              className="max-h-52 object-contain"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setEditBackImage(null)}
+                              title="Remove photo"
+                              className="absolute top-3 right-3 w-6 h-6 bg-black text-white flex items-center justify-center cursor-pointer hover:bg-red-600 transition-all shadow-xs"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={() => editBackInputRef.current?.click()}
+                                className="bg-black/90 text-white text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-black transition-all shadow-xs cursor-pointer"
+                              >
+                                REPLACE
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("edit-back");
+                                  setShowMediaModal(true);
+                                }}
+                                className="bg-white border border-black text-black text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-neutral-100 transition-all shadow-xs cursor-pointer"
+                              >
+                                R2 LIBRARY
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <ModalBackVisual
+                              type={
+                                editSegment.toUpperCase() === "SHORTS" || editSegment.toUpperCase() === "PANTS"
+                                  ? "shorts"
+                                  : editSegment.toUpperCase() === "HATS" || editSegment.toUpperCase() === "HAT"
+                                  ? "hat"
+                                  : "tee"
+                              }
+                              colorHex={editShirtColor}
+                            />
+                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity backdrop-blur-[1px]">
+                              <button
+                                type="button"
+                                onClick={() => editBackInputRef.current?.click()}
+                                className="w-9 h-9 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center text-black hover:scale-105 transition-transform cursor-pointer"
+                              >
+                                <Upload className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => editBackInputRef.current?.click()}
+                                className="text-[8px] font-black tracking-widest text-black uppercase bg-white/95 px-2.5 py-1 shadow-xs border border-neutral-200 hover:bg-black hover:text-white transition-all cursor-pointer"
+                              >
+                                UPLOAD PHOTO TO R2
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("edit-back");
+                                  setShowMediaModal(true);
+                                }}
+                                className="text-[7.5px] font-black tracking-widest text-neutral-600 uppercase bg-white/90 px-2 py-0.5 border border-neutral-200 hover:text-black cursor-pointer"
+                              >
+                                OR PICK FROM R2
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1180,9 +1459,14 @@ function notifyStockSync() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Primary Front Silhouette */}
                     <div>
-                      <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase mb-2">
-                        PRIMARY FRONT SILHOUETTE
-                      </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+                          PRIMARY FRONT SILHOUETTE
+                        </label>
+                        <span className="text-[7.5px] font-black text-neutral-400 tracking-wider uppercase">
+                          CLOUDFLARE R2
+                        </span>
+                      </div>
                       <input
                         type="file"
                         accept="image/*"
@@ -1190,16 +1474,49 @@ function notifyStockSync() {
                         onChange={(e) => handleImageUpload(e, "front")}
                         className="hidden"
                       />
-                      <div
-                        onClick={() => frontInputRef.current?.click()}
-                        className="h-64 bg-white border border-dashed border-[#e5e5e5] hover:border-neutral-400 flex flex-col items-center justify-center cursor-pointer transition-all p-4 relative group"
-                      >
-                        {frontImage ? (
-                          <img
-                            src={frontImage}
-                            alt="Front Silhouette"
-                            className="max-h-52 object-contain"
-                          />
+                      <div className="h-64 bg-white border border-dashed border-[#e5e5e5] hover:border-black flex flex-col items-center justify-center relative p-4 group transition-all">
+                        {isUploadingFront ? (
+                          <div className="flex flex-col items-center justify-center gap-2 text-black">
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            <span className="text-[8.5px] font-black tracking-widest uppercase">
+                              UPLOADING TO R2...
+                            </span>
+                          </div>
+                        ) : frontImage ? (
+                          <>
+                            <img
+                              src={frontImage}
+                              alt="Front Silhouette"
+                              className="max-h-52 object-contain"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setFrontImage(null)}
+                              title="Remove photo"
+                              className="absolute top-3 right-3 w-6 h-6 bg-black text-white flex items-center justify-center cursor-pointer hover:bg-red-600 transition-all shadow-xs"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={() => frontInputRef.current?.click()}
+                                className="bg-black/90 text-white text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-black transition-all shadow-xs cursor-pointer"
+                              >
+                                REPLACE
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("new-front");
+                                  setShowMediaModal(true);
+                                }}
+                                className="bg-white border border-black text-black text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-neutral-100 transition-all shadow-xs cursor-pointer"
+                              >
+                                R2 LIBRARY
+                              </button>
+                            </div>
+                          </>
                         ) : (
                           <>
                             <ModalFrontVisual
@@ -1212,13 +1529,31 @@ function notifyStockSync() {
                               }
                               colorHex={newShirtColor}
                             />
-                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity backdrop-blur-[1px]">
-                              <div className="w-9 h-9 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center text-black mb-1">
+                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity backdrop-blur-[1px]">
+                              <button
+                                type="button"
+                                onClick={() => frontInputRef.current?.click()}
+                                className="w-9 h-9 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center text-black hover:scale-105 transition-transform cursor-pointer"
+                              >
                                 <Upload className="w-4 h-4" />
-                              </div>
-                              <span className="text-[8px] font-black tracking-widest text-black uppercase bg-white/90 px-2 py-0.5 shadow-xs">
-                                UPLOAD CUSTOM IMAGE
-                              </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => frontInputRef.current?.click()}
+                                className="text-[8px] font-black tracking-widest text-black uppercase bg-white/95 px-2.5 py-1 shadow-xs border border-neutral-200 hover:bg-black hover:text-white transition-all cursor-pointer"
+                              >
+                                UPLOAD PHOTO TO R2
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("new-front");
+                                  setShowMediaModal(true);
+                                }}
+                                className="text-[7.5px] font-black tracking-widest text-neutral-600 uppercase bg-white/90 px-2 py-0.5 border border-neutral-200 hover:text-black cursor-pointer"
+                              >
+                                OR PICK FROM R2
+                              </button>
                             </div>
                           </>
                         )}
@@ -1227,9 +1562,14 @@ function notifyStockSync() {
 
                     {/* Secondary Back Vision */}
                     <div>
-                      <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase mb-2">
-                        SECONDARY BACK VISION
-                      </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[8.5px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+                          SECONDARY BACK VISION
+                        </label>
+                        <span className="text-[7.5px] font-black text-neutral-400 tracking-wider uppercase">
+                          CLOUDFLARE R2
+                        </span>
+                      </div>
                       <input
                         type="file"
                         accept="image/*"
@@ -1237,16 +1577,49 @@ function notifyStockSync() {
                         onChange={(e) => handleImageUpload(e, "back")}
                         className="hidden"
                       />
-                      <div
-                        onClick={() => backInputRef.current?.click()}
-                        className="h-64 bg-white border border-dashed border-[#e5e5e5] hover:border-neutral-400 flex flex-col items-center justify-center cursor-pointer transition-all p-4 relative group"
-                      >
-                        {backImage ? (
-                          <img
-                            src={backImage}
-                            alt="Back Vision"
-                            className="max-h-52 object-contain"
-                          />
+                      <div className="h-64 bg-white border border-dashed border-[#e5e5e5] hover:border-black flex flex-col items-center justify-center relative p-4 group transition-all">
+                        {isUploadingBack ? (
+                          <div className="flex flex-col items-center justify-center gap-2 text-black">
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            <span className="text-[8.5px] font-black tracking-widest uppercase">
+                              UPLOADING TO R2...
+                            </span>
+                          </div>
+                        ) : backImage ? (
+                          <>
+                            <img
+                              src={backImage}
+                              alt="Back Vision"
+                              className="max-h-52 object-contain"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setBackImage(null)}
+                              title="Remove photo"
+                              className="absolute top-3 right-3 w-6 h-6 bg-black text-white flex items-center justify-center cursor-pointer hover:bg-red-600 transition-all shadow-xs"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={() => backInputRef.current?.click()}
+                                className="bg-black/90 text-white text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-black transition-all shadow-xs cursor-pointer"
+                              >
+                                REPLACE
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("new-back");
+                                  setShowMediaModal(true);
+                                }}
+                                className="bg-white border border-black text-black text-[8px] font-black uppercase tracking-wider px-2.5 py-1 hover:bg-neutral-100 transition-all shadow-xs cursor-pointer"
+                              >
+                                R2 LIBRARY
+                              </button>
+                            </div>
+                          </>
                         ) : (
                           <>
                             <ModalBackVisual
@@ -1259,13 +1632,31 @@ function notifyStockSync() {
                               }
                               colorHex={newShirtColor}
                             />
-                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity backdrop-blur-[1px]">
-                              <div className="w-9 h-9 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center text-black mb-1">
+                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity backdrop-blur-[1px]">
+                              <button
+                                type="button"
+                                onClick={() => backInputRef.current?.click()}
+                                className="w-9 h-9 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center text-black hover:scale-105 transition-transform cursor-pointer"
+                              >
                                 <Upload className="w-4 h-4" />
-                              </div>
-                              <span className="text-[8px] font-black tracking-widest text-black uppercase bg-white/90 px-2 py-0.5 shadow-xs">
-                                UPLOAD CUSTOM IMAGE
-                              </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => backInputRef.current?.click()}
+                                className="text-[8px] font-black tracking-widest text-black uppercase bg-white/95 px-2.5 py-1 shadow-xs border border-neutral-200 hover:bg-black hover:text-white transition-all cursor-pointer"
+                              >
+                                UPLOAD PHOTO TO R2
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaSelectTarget("new-back");
+                                  setShowMediaModal(true);
+                                }}
+                                className="text-[7.5px] font-black tracking-widest text-neutral-600 uppercase bg-white/90 px-2 py-0.5 border border-neutral-200 hover:text-black cursor-pointer"
+                              >
+                                OR PICK FROM R2
+                              </button>
                             </div>
                           </>
                         )}
@@ -1503,6 +1894,17 @@ function notifyStockSync() {
               </div>
             </div>
           )}
+
+          {/* Cloudflare R2 Media Asset Manager Modal */}
+          <R2MediaModal
+            isOpen={showMediaModal}
+            onClose={() => {
+              setShowMediaModal(false);
+              setMediaSelectTarget(null);
+            }}
+            selectMode={Boolean(mediaSelectTarget)}
+            onSelectImage={handleSelectFromR2}
+          />
         </main>
       </div>
     </div>

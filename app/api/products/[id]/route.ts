@@ -106,15 +106,19 @@ export async function PUT(
         ? Number(body.stock)
         : Object.values(stockAllocation).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
 
+    const frontImage = body.frontImage !== undefined ? body.frontImage : (current?.front_image ?? null);
+    const backImage = body.backImage !== undefined ? body.backImage : (current?.back_image ?? null);
+    const images = body.images || (frontImage ? [frontImage, ...(backImage ? [backImage] : [])] : (current?.images ? (typeof current.images === "string" ? JSON.parse(current.images) : current.images) : []));
+
     if (current) {
       // Update existing record
       await pool.query(
         `
         UPDATE products
-        SET name = ?, category = ?, price = ?, price_number = ?, sku = ?, type = ?, color_name = ?, color_hex = ?, sizes = ?, description = ?, stock = ?, stock_allocation = ?
+        SET name = ?, category = ?, price = ?, price_number = ?, sku = ?, type = ?, color_name = ?, color_hex = ?, sizes = ?, description = ?, stock = ?, stock_allocation = ?, front_image = ?, back_image = ?, images = ?
         WHERE id = ?
       `,
-        [name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, stock, JSON.stringify(stockAllocation), id]
+        [name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, stock, JSON.stringify(stockAllocation), frontImage, backImage, JSON.stringify(images), id]
       );
     } else {
       // Insert if not yet in DB
@@ -122,10 +126,11 @@ export async function PUT(
         `
         INSERT INTO products (
           id, name, category, price, price_number, sku, type, color_name, color_hex, front_badge,
-          sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids, stock, stock_allocation
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '01 / FRONT', ?, ?, '', '', '[]', '[]', ?, ?)
+          sizes, description, sizing_notes, shipping_notes, swatches, similar_product_ids, stock, stock_allocation,
+          front_image, back_image, images
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '01 / FRONT', ?, ?, '', '', '[]', '[]', ?, ?, ?, ?, ?)
       `,
-        [id, name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, stock, JSON.stringify(stockAllocation)]
+        [id, name, category, price, priceNumber, sku, type, colorName, colorHex, sizes, description, stock, JSON.stringify(stockAllocation), frontImage, backImage, JSON.stringify(images)]
       );
     }
 

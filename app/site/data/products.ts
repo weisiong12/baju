@@ -17,6 +17,9 @@ export interface Product {
   similarProductIds: string[];
   stock?: number;
   stockAllocation?: Record<string, number>;
+  frontImage?: string | null;
+  backImage?: string | null;
+  images?: string[];
 }
 
 export const PRODUCTS_DATABASE: Record<string, Product> = {

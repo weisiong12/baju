@@ -42,6 +42,9 @@ export async function initDatabase() {
         similar_product_ids JSON,
         stock INT DEFAULT 250,
         stock_allocation JSON,
+        front_image TEXT,
+        back_image TEXT,
+        images JSON,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -85,7 +88,22 @@ export async function initDatabase() {
       console.log("Seeding completed successfully!");
     }
 
-    // 4. Correct any legacy mis-categorized items in DB
+    // 4. Correct any legacy mis-categorized items in DB & ensure image columns exist
+    try {
+      await connection.query("ALTER TABLE products ADD COLUMN front_image TEXT");
+    } catch (e) {
+      // ignore
+    }
+    try {
+      await connection.query("ALTER TABLE products ADD COLUMN back_image TEXT");
+    } catch (e) {
+      // ignore
+    }
+    try {
+      await connection.query("ALTER TABLE products ADD COLUMN images JSON");
+    } catch (e) {
+      // ignore
+    }
     try {
       await connection.query("UPDATE products SET category = 'HATS', type = 'hat' WHERE UPPER(name) LIKE '%HAT%' OR UPPER(category) IN ('HATS', 'HAT')");
       await connection.query("UPDATE products SET category = 'PANTS', type = 'shorts' WHERE UPPER(name) LIKE '%PANT%' AND category = 'TEES'");
@@ -145,6 +163,9 @@ export function mapRowToProduct(row: any): Product {
     colorName: row.color_name,
     colorHex: row.color_hex,
     frontBadge: row.front_badge || "01 / FRONT",
+    frontImage: row.front_image || null,
+    backImage: row.back_image || null,
+    images: parseJson(row.images) || [],
     sizes: parseJson(row.sizes) || ["S", "M", "L", "XL", "XXL"],
     description: parseJson(row.description) || [],
     sizingNotes: row.sizing_notes || "",

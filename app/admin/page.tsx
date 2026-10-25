@@ -4,12 +4,14 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
-import { TrendingUp, Box, ShoppingBag, Info } from "lucide-react";
+import R2MediaModal from "../components/R2MediaModal";
+import { TrendingUp, Box, ShoppingBag, Info, Cloud, Upload } from "lucide-react";
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [selectedMonth, setSelectedMonth] = useState("OCT 2026");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [showMediaModal, setShowMediaModal] = useState(false);
 
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const [catalogCount, setCatalogCount] = useState(5);
@@ -120,13 +122,23 @@ export default function AdminDashboard() {
         {/* Main Dashboard Canvas */}
         <main className="flex-1 px-8 py-8 md:px-10 md:py-9 space-y-7 max-w-[1440px]">
           {/* Header */}
-          <div>
-            <h1 className="font-display text-[26px] md:text-[28px] font-black italic tracking-[0.06em] text-black uppercase">
-              EXECUTIVE INTELLIGENCE
-            </h1>
-            <p className="text-[9.5px] font-bold tracking-[0.24em] text-neutral-400 uppercase mt-0.5">
-              REAL-TIME PERFORMANCE ANALYTICS & LOGISTICS
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="font-display text-[26px] md:text-[28px] font-black italic tracking-[0.06em] text-black uppercase">
+                EXECUTIVE INTELLIGENCE
+              </h1>
+              <p className="text-[9.5px] font-bold tracking-[0.24em] text-neutral-400 uppercase mt-0.5">
+                REAL-TIME PERFORMANCE ANALYTICS & LOGISTICS
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowMediaModal(true)}
+              className="bg-black text-white px-4 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-neutral-800 transition-all flex items-center gap-2 shadow-xs cursor-pointer self-start sm:self-auto"
+            >
+              <Cloud className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>R2 MEDIA ASSETS</span>
+            </button>
           </div>
 
           {/* Top 3 Metric Cards */}
@@ -296,8 +308,48 @@ export default function AdminDashboard() {
                   ALL TRANSACTIONAL DATA IS SYNCHRONIZED WITH YOUR TIDB CLOUD CLUSTER.
                 </p>
               </div>
+
+              {/* Cloudflare R2 Storage Status Widget */}
+              <div className="bg-white border border-[#eaeaea] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-neutral-700">
+                    <Cloud className="w-3.5 h-3.5 text-black" />
+                    <span className="text-[9.5px] font-black tracking-[0.2em] uppercase">
+                      CLOUDFLARE R2
+                    </span>
+                  </div>
+                  <span className="text-[7.5px] font-black tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 uppercase">
+                    ONLINE
+                  </span>
+                </div>
+                <div className="space-y-1 text-[9px] font-bold text-neutral-500 uppercase">
+                  <div className="flex justify-between">
+                    <span>BUCKET</span>
+                    <span className="text-black font-black">CLOTH</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>PUBLIC DEV HOST</span>
+                    <span className="text-black font-mono text-[8px] truncate max-w-[140px]">
+                      PUB-C52E7B8C42B4...
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowMediaModal(true)}
+                  className="w-full bg-[#fafafa] border border-[#e5e5e5] hover:border-black py-2 text-[9px] font-black uppercase tracking-widest text-black transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:bg-black hover:text-white"
+                >
+                  <Upload className="w-3 h-3" />
+                  <span>UPLOAD PHOTO</span>
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Cloudflare R2 Media Modal */}
+          <R2MediaModal
+            isOpen={showMediaModal}
+            onClose={() => setShowMediaModal(false)}
+          />
         </main>
       </div>
     </div>

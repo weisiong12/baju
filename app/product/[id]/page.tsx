@@ -16,9 +16,13 @@ import StoreHeader from "../../site/components/StoreHeader";
 function StreetwearVisual({
   type,
   color,
+  frontImage,
+  backImage,
 }: {
   type?: "tee" | "shorts" | "hat" | string;
   color?: string;
+  frontImage?: string | null;
+  backImage?: string | null;
 }) {
   const safeColor = color || "#18181b";
   const [isFlipped, setIsFlipped] = useState(false);
@@ -86,8 +90,14 @@ function StreetwearVisual({
           {/* ========================================================================= */}
           {/* FRONT VIEW (01 / FRONT)                                                   */}
           {/* ========================================================================= */}
-          <div className="absolute inset-0 flex items-center justify-center backface-hidden">
-            {type === "hat" ? (
+          <div className="absolute inset-0 flex items-center justify-center backface-hidden p-6">
+            {frontImage ? (
+              <img
+                src={frontImage}
+                alt="Front Silhouette"
+                className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+              />
+            ) : type === "hat" ? (
               <svg
                 viewBox="0 0 160 140"
                 className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -241,10 +251,16 @@ function StreetwearVisual({
           {/* BACK VIEW (02 / BACK) - Oversized Streetwear Graphic Artwork              */}
           {/* ========================================================================= */}
           <div
-            className="absolute inset-0 flex items-center justify-center backface-hidden"
+            className="absolute inset-0 flex items-center justify-center backface-hidden p-6"
             style={{ transform: "rotateY(180deg)" }}
           >
-            {type === "hat" ? (
+            {backImage ? (
+              <img
+                src={backImage}
+                alt="Back Vision"
+                className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
+              />
+            ) : type === "hat" ? (
               <svg
                 viewBox="0 0 160 140"
                 className="w-4/5 h-4/5 drop-shadow-xl group-hover:scale-105 group-active:scale-95 transition-all duration-300 select-none"
@@ -671,7 +687,12 @@ function ProductDetailPageContent() {
               </div>
             )}
             {/* Product Visual */}
-            <StreetwearVisual type={effectiveType} color={product.colorHex} />
+            <StreetwearVisual
+              type={effectiveType}
+              color={product.colorHex}
+              frontImage={product.frontImage}
+              backImage={product.backImage}
+            />
           </div>
 
           {/* Right Column: Details & Purchasing Controls */}
